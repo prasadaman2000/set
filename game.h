@@ -21,13 +21,16 @@ struct Result {
   int score;
   absl::Duration total_game_time;
   std::vector<absl::Duration> move_times;
+  std::vector<std::string> moves;
+  std::vector<std::string> state_ids;
 };
 
 class Game {
  public:
   Game();
-  Result Play(Player* p);
-  void WriteStateToFile();
+  Result Play(Player* p, int num_turns = -1);
+  void WriteStateToFile(std::string fname);
+  bool ReadBoardStateFromFile(std::string fname);
   std::optional<std::vector<int>> ValidateAndReturnSortedCardIndices(
       std::string idxstr);
   std::optional<std::vector<int>> ValidateAndReturnSortedCardIndices(
@@ -41,6 +44,8 @@ class Game {
 
   void UpdateOrRemoveCardFromTable(int idx);
   void RemoveCardFromTable(int idx);
+  std::string BoardAsString();
+  std::string BoardId();
 
   std::unique_ptr<Deck> deck_;
   std::vector<std::optional<Card>> cards_on_table_;

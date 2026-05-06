@@ -1,13 +1,18 @@
 #include "game.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <optional>
 #include <sstream>
 #include <string>
 
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_split.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "deck.h"
@@ -27,23 +32,66 @@ Game::Game() {
   }
 }
 
-void Game::WriteStateToFile() {
-  std::ofstream file("/Users/aman/CS/set/display.txt");
+std::string Game::BoardAsString() {
+  std::stringstream s;
+
+  for (std::optional<Card> c : cards_on_table_) {
+    if (c.has_value()) {
+      s << c->color << " " << c->shape << " " << c->fill << " " << c->count
+        << "\n";
+    } else {
+      s << 0 << " " << 0 << " " << 0 << " " << 0 << "\n";
+    }
+  }
+
+  return s.str();
+}
+
+std::string Game::BoardId() {
+  std::hash<std::string> hasher;
+  return absl::StrCat(hasher(BoardAsString()));
+}
+
+void Game::WriteStateToFile(std::string fname) {
+  std::ofstream file(fname);
 
   if (file) {
-    for (std::optional<Card> c : cards_on_table_) {
-      if (c.has_value()) {
-        file << c->color << " " << c->shape << " " << c->fill << " " << c->count
-             << "\n";
-      } else {
-        file << 0 << " " << 0 << " " << 0 << " " << 0 << "\n";
-      }
-    }
+    file << BoardAsString();
   } else {
     std::cout << "Could not open file\n";
   }
 
   file.close();
+}
+
+bool Game::ReadBoardStateFromFile(std::string fname) {
+  std::ifstream file(fname);
+
+  if (!file) {
+    return false;
+  }
+
+  cards_on_table_.clear();
+
+  std::string line;
+  while (std::getline(file, line)) {
+    std::vector<std::string> split = absl::StrSplit(line, " ");
+    if (split.size() != 4) {
+      std::cout << line << " is not a valid line.\n";
+      return false;
+    }
+    Card c;
+    c.color = Color(std::stoi(split[0]));
+    c.shape = Shape(std::stoi(split[1]));
+    c.fill = Fill(std::stoi(split[2]));
+    c.count = std::stoi(split[3]);
+
+    cards_on_table_.push_back(c);
+  }
+
+  file.close();
+
+  return true;
 }
 
 std::vector<std::vector<int>> Game::FindAllSets() {
@@ -137,15 +185,16 @@ std::optional<Card> Game::CardAtIndex(int idx) { return cards_on_table_[idx]; }
 
 bool Game::HasSet() { return !FindAllSets().empty(); }
 
-Result Game::Play(Player* p) {
+Result Game::Play(Player* p, int num_turns) {
   // std::cout << "Let's play Set! Be sure to start the visualizer.\n";
 
   absl::Time start_time = absl::Now();
   Result r;
   absl::Time turn_start_time = absl::Now();
   while (true) {
-    WriteStateToFile();
-    if (!HasSet() && !deck_->HasMoreCards()) {
+    WriteStateToFile("/Users/aman/CS/set/display.txt");
+    if ((r.moves.size() == num_turns) ||
+        (!HasSet() && !deck_->HasMoreCards())) {
       std::cout << "Game is done!\n";
       r.total_game_time = absl::Now() - start_time;
       return r;
@@ -182,6 +231,11 @@ Result Game::Play(Player* p) {
           idxs = *ValidateAndReturnSortedCardIndices(idxs);
           ++r.score;
           r.move_times.push_back(absl::Now() - turn_start_time);
+          std::string board_id = BoardId();
+          r.state_ids.push_back(board_id);
+          r.moves.push_back(absl::StrJoin(idxs, "_"));
+          WriteStateToFile(
+              absl::StrCat("/Users/aman/CS/set/game_states/", board_id));
           turn_start_time = absl::Now();
           UpdateOrRemoveCardFromTable(idxs[2]);
           UpdateOrRemoveCardFromTable(idxs[1]);

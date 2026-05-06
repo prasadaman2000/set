@@ -29,6 +29,7 @@ cc_library(
         ":deck",
         ":ttl_pointer",
         "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/time",
     ],
 )
@@ -41,5 +42,25 @@ cc_binary(
         "@abseil-cpp//absl/flags:flag",
         "@abseil-cpp//absl/flags:parse",
         "@abseil-cpp//absl/strings",
+    ],
+)
+
+cc_binary(
+    name = "cli_main",
+    srcs = ["cli_main.cc"],
+    deps = [
+        ":game",
+        "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/flags:parse",
+    ],
+)
+
+cc_binary(
+    name = "replay_state",
+    srcs = ["replay_state.cc"],
+    deps = [
+        ":game",
+        "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/flags:parse",
     ],
 )

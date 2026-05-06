@@ -157,10 +157,11 @@ int main(int argc, char** argv) {
   for (int i = 0; i < results.size(); ++i) {
     std::string path = absl::StrCat(dir_path, "/game_", i, ".csv");
     std::ofstream out_file(path);
-    out_file << "turn,time_ms\n";
+    out_file << "turn,time_ms,move,board_id\n";
     for (int j = 0; j < results[i].move_times.size(); ++j) {
       out_file << j + 1 << ","
-               << absl::ToDoubleMilliseconds(results[i].move_times[j]) << "\n";
+               << absl::ToDoubleMilliseconds(results[i].move_times[j]) << ","
+               << results[i].moves[j] << "," << results[i].state_ids[j] << "\n";
     }
     std::cout << "Game " << i + 1 << " time " << results[i].total_game_time
               << "\n";

@@ -1,5 +1,10 @@
 import pygame
 import time
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-f", "--file", help="File to use to display")
+args = parser.parse_args()
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -107,6 +112,8 @@ def draw_card(surface, idx, color, shape, fill, count):
 
 
 if __name__ == "__main__":
+    fname = args.file if args.file else "display.txt"
+
     # Initialize Pygame
     pygame.init()
 

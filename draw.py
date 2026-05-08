@@ -113,6 +113,7 @@ def draw_card(surface, idx, color, shape, fill, count):
 
 if __name__ == "__main__":
     fname = args.file if args.file else "display.txt"
+    print(f"reading from {fname}")
 
     # Initialize Pygame
     pygame.init()
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     running = True
     while running:
         screen.fill((0, 0, 0))
-        with open("display.txt", "r") as f:
+        with open(fname, "r") as f:
             for idx, line in enumerate(f.readlines()):
                 line = line.strip()
                 color, shape, fill, count = line.split(" ")

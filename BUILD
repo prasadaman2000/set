@@ -62,5 +62,6 @@ cc_binary(
         ":game",
         "@abseil-cpp//absl/flags:flag",
         "@abseil-cpp//absl/flags:parse",
+        "@abseil-cpp//absl/strings",
     ],
 )

@@ -118,7 +118,7 @@ ttl_pointer<Card> ForgetfulScanPlayer::DelayedForgettableCard(
 PlayerAction ForgetfulScanPlayer::GetAction() {
   std::vector<int> valid_indicies = game_->IndiciesWithCardsOnTable();
   for (int i = 0; i < valid_indicies.size() - 2; ++i) {
-    ttl_pointer<Card> card_i = DelayedForgettableCard(valid_indicies[i], 8, 40);
+    ttl_pointer<Card> card_i = DelayedForgettableCard(valid_indicies[i], 8, 50);
     for (int j = i + 1; j < valid_indicies.size() - 1; ++j) {
       ttl_pointer<Card> card_j =
           DelayedForgettableCard(valid_indicies[j], 9, 50);
@@ -228,6 +228,8 @@ PlayerAction MatchPlayer::GetAction() {
         return {.action = SET,
                 .set_idxs = {first_index, second_index, valid_indicies[i]}};
       }
+
+      card_to_index[c3] = valid_indicies[i];
     }
   }
 
@@ -293,6 +295,7 @@ PlayerAction RememberTheLastTurnPlayer::GetAction() {
         last_set_ = {first_index, second_index, valid_indicies[i]};
         return {.action = SET, .set_idxs = last_set_};
       }
+      card_to_index[c3] = valid_indicies[i];
     }
     cards_to_look_for_[card_to_find] = {first_index, second_index};
   }
@@ -375,6 +378,7 @@ PlayerAction RememberTheLastTurnPlayerForgetful::GetAction() {
         RememberSomeToLookFor(3, cards_to_look_for);
         return {.action = SET, .set_idxs = last_set_};
       }
+      card_to_index[c3] = valid_indicies[i];
     }
     cards_to_look_for.push_back({card_to_find, {first_index, second_index}});
   }
